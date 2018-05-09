@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace SimPod\SmsManager;
 
-use SimPod\SmsManager\Exception\InvalidPhoneNumber;
-use function preg_match;
-
 class Sms
 {
     /** @var string */
@@ -39,24 +36,9 @@ class Sms
         if ($type === null) {
             $type = RequestType::getRequestTypeHigh();
         }
-        $this->type     = $type;
-        $this->sender   = $sender;
-        $this->customId = $customId;
-
-        foreach ($recipients as $recipient) {
-            if (! (preg_match('/^\+420(?:(?:60[1-8]|7(?:0[2-5]|[2379]\d))\d{6})$/', $recipient)
-                || (
-                    preg_match(
-                        '/^\+4219(?:0(?:[1-8]\d|9[1-9])|(?:1[0-24-9]|4[04589]|50)\d)\d{5}$/',
-                        $recipient
-                    )
-                    && $type !== RequestType::getRequestTypeLow()
-                ))
-            ) {
-                throw InvalidPhoneNumber::notInSmsManagerFormat($recipient);
-            }
-        }
-
+        $this->type       = $type;
+        $this->sender     = $sender;
+        $this->customId   = $customId;
         $this->recipients = $recipients;
     }
 
