@@ -13,14 +13,11 @@ use function dom_import_simplexml;
 
 final class ApiSmsManager implements SmsManager
 {
-    private const XML_BASE_PATH = 'http://xml-api.smsmanager.cz/';
+    private const XML_BASE_PATH = 'https://xml-api.smsmanager.cz/';
     private const XML_PATH_SEND = 'Send';
 
     /** @var string */
-    private $username;
-
-    /**@var string */
-    private $password;
+    private $apiKey;
 
     /**@var Client */
     private $xmlClient;
@@ -34,10 +31,9 @@ final class ApiSmsManager implements SmsManager
         );
     }
 
-    public function setAuth(string $username, string $password) : void
+    public function setApiKey(string $apiKey) : void
     {
-        $this->username = $username;
-        $this->password = $password;
+        $this->apiKey = $apiKey;
     }
 
     /**
@@ -76,8 +72,7 @@ final class ApiSmsManager implements SmsManager
     {
         $xml           = new \SimpleXMLElement('<RequestDocument/>');
         $requestHeader = $xml->addChild('RequestHeader');
-        $requestHeader->addChild('Username', $this->username);
-        $requestHeader->addChild('Password', $this->password);
+        $requestHeader->addChild('Apikey', $this->apiKey);
         $request = $xml
             ->addChild('RequestList')
             ->addChild('Request');
