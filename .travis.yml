@@ -8,30 +8,63 @@ php:
   - nightly
 
 before_install:
-  - composer self-update
+  - mv ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini{,.disabled} || echo "xdebug not available"
 
-before_script:
+install:
   - travis_retry composer update --prefer-dist
 
 script: ./vendor/bin/phpunit
 
 jobs:
+  allow_failures:
+    - php: nightly
+    - env: DEV_DEPENDENCIES
+
   include:
-    - stage: Coding Standard
+    - stage: Test
+      env: LOWEST_DEPENDENCIES
+      install:
+        - travis_retry composer update -n --prefer-dist --prefer-lowest
+
+    - stage: Test
+      env: LOWEST_DEPENDENCIES
+      php: 7.2
+      install:
+        - travis_retry composer update -n --prefer-dist --prefer-lowest
+
+    - stage: Test
+      env: LOWEST_DEPENDENCIES
+      php: nightly
+      install:
+        - travis_retry composer update -n --prefer-dist --prefer-lowest
+
+    - stage: Test
+      env: DEV_DEPENDENCIES
+      php: nightly
+      install:
+        - composer config minimum-stability dev
+        - travis_retry composer update -n --prefer-dist
+
+    - stage: Test
+      env: COVERAGE
       php: 7.1
-      script: ./vendor/bin/phpcs
+      before_script:
+        - mv ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini{.disabled,}
+        - if [[ ! $(php -m | grep -si xdebug) ]]; then echo "xdebug required for coverage"; exit 1; fi
+      script:
+        - ./vendor/bin/phpunit -v --coverage-clover ./build/logs/clover.xml
+      after_script:
+        - wget https://github.com/scrutinizer-ci/ocular/releases/download/1.5.2/ocular.phar
+        - php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml
+
+    - stage: Coding standard
+      script:
+        - ./vendor/bin/phpcs
 
     - stage: Static Analysis
-      php: 7.1
       script:
         - ./vendor/bin/phpstan analyse -c phpstan.neon -l max src
 
 cache:
   directories:
     - $HOME/.composer/cache
-
-after_script:
-  # upload clover.xml file to Scrutinizer to analyze it
-  - |
-    if [ "$TRAVIS_PHP_VERSION" == "7.1" ]; then wget https://scrutinizer-ci.com/ocular.phar; fi
-    if [ "$TRAVIS_PHP_VERSION" == "7.1" ]; then php ocular.phar code-coverage:upload --format=php-clover temp/clover.xml; fi
