@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace SimPod\SmsManager;
 
-class Sms
+use SimPod\SmsManager\Exception\NoRecipientsProvided;
+use function count;
+
+class SmsMessage
 {
     /** @var string */
     protected $message;
 
     /** @var RequestType */
-    protected $type;
+    protected $requestType;
 
     /** @var string[] */
     protected $recipients = [];
@@ -27,19 +30,23 @@ class Sms
     public function __construct(
         string $message,
         array $recipients,
-        ?RequestType $type = null,
+        ?RequestType $requestTypeHigh = null,
         ?string $sender = null,
         ?int $customId = null
     ) {
+        if (count($recipients) === 0) {
+            throw new NoRecipientsProvided();
+        }
+
         $this->message = $message;
 
-        if ($type === null) {
-            $type = RequestType::getRequestTypeHigh();
+        if ($requestTypeHigh === null) {
+            $requestTypeHigh = RequestType::getRequestTypeHigh();
         }
-        $this->type       = $type;
-        $this->sender     = $sender;
-        $this->customId   = $customId;
-        $this->recipients = $recipients;
+        $this->requestType = $requestTypeHigh;
+        $this->sender      = $sender;
+        $this->customId    = $customId;
+        $this->recipients  = $recipients;
     }
 
     public function getMessage() : string
@@ -47,9 +54,9 @@ class Sms
         return $this->message;
     }
 
-    public function getType() : RequestType
+    public function getRequestType() : RequestType
     {
-        return $this->type;
+        return $this->requestType;
     }
 
     /**

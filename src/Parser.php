@@ -6,6 +6,7 @@ namespace SimPod\SmsManager;
 
 use Psr\Http\Message\ResponseInterface;
 use SimpleXMLElement;
+use SimPod\SmsManager\Exception\XmlParsingFailed;
 use Throwable;
 use function libxml_disable_entity_loader;
 use function libxml_use_internal_errors;

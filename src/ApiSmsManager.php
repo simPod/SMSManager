@@ -39,9 +39,9 @@ final class ApiSmsManager implements SmsManager
     /**
      * @return Response|bool
      */
-    public function sendSms(Sms $sms)
+    public function send(SmsMessage $smsMessage)
     {
-        $xml = $this->buildXml($sms);
+        $xml = $this->buildXml($smsMessage);
 
         if ($xml === null) {
             return false;
@@ -64,11 +64,11 @@ final class ApiSmsManager implements SmsManager
         } catch (ClientException | ServerException $exception) {
             $response = Parser::parseXmlResponseBody($exception->getResponse());
 
-            throw SendingFailed::forRecipients($sms->getRecipients(), $response);
+            throw SendingFailed::forRecipients($smsMessage->getRecipients(), $response);
         }
     }
 
-    private function buildXml(Sms $sms) : ?string
+    private function buildXml(SmsMessage $smsMessage) : ?string
     {
         $xml           = new \SimpleXMLElement('<RequestDocument/>');
         $requestHeader = $xml->addChild('RequestHeader');
@@ -77,22 +77,22 @@ final class ApiSmsManager implements SmsManager
             ->addChild('RequestList')
             ->addChild('Request');
 
-        $request->addAttribute('Type', $sms->getType()->getValue());
+        $request->addAttribute('Type', $smsMessage->getRequestType()->getValue());
 
-        if ($sms->getSender() !== null) {
-            $request->addAttribute('Sender', $sms->getSender());
+        if ($smsMessage->getSender() !== null) {
+            $request->addAttribute('Sender', $smsMessage->getSender());
         }
 
-        if ($sms->getCustomId() !== null) {
-            $request->addAttribute('CustomID', (string) $sms->getCustomId());
+        if ($smsMessage->getCustomId() !== null) {
+            $request->addAttribute('CustomID', (string) $smsMessage->getCustomId());
         }
 
-        $request->addChild('Message', $sms->getMessage())->addAttribute('Type', 'Text');
+        $request->addChild('Message', $smsMessage->getMessage())->addAttribute('Type', 'Text');
 
         $numberList = $request->addChild('NumbersList');
 
         $hasAnyNumber = false;
-        foreach ($sms->getRecipients() as $recipient) {
+        foreach ($smsMessage->getRecipients() as $recipient) {
             Validator::isE164($recipient);
             $numberList->addChild('Number', $recipient);
             $hasAnyNumber = true;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SimPod\SmsManager;
+namespace SimPod\SmsManager\Exception;
 
 use Exception;
 

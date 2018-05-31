@@ -9,5 +9,5 @@ interface SmsManager
     /**
      * @return Response|bool
      */
-    public function sendSms(Sms $sms);
+    public function send(SmsMessage $smsMessage);
 }
