@@ -13,7 +13,7 @@ use function dom_import_simplexml;
 
 final class ApiSmsManager implements SmsManager
 {
-    private const XML_BASE_PATH = 'http://xml-api.smsmanager.cz/';
+    private const XML_BASE_PATH = 'https://xml-api.smsmanager.cz/';
     private const XML_PATH_SEND = 'Send';
 
     /** @var string */
