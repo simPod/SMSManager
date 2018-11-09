@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace SimPod\SmsManager\Exception;
 
+use Exception;
 use SimpleXMLElement;
 use function implode;
 use function sprintf;
 
-final class SendingFailed extends \Exception
+final class SendingFailed extends Exception
 {
     /**
      * @param string[] $recipients

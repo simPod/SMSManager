@@ -11,13 +11,13 @@ class Response
     /** @var int */
     protected $id;
 
-    /**@var string */
+    /** @var string */
     protected $type;
 
-    /**@var string */
+    /** @var bool */
     protected $isOk;
 
-    /**@var ResponseRequest[] */
+    /** @var ResponseRequest[] */
     protected $responseRequests = [];
 
     public function __construct(int $id, string $type)

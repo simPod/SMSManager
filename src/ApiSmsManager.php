@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace SimPod\SmsManager;
 
+use Assert\Assertion;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ServerException;
 use Psr\Http\Message\ResponseInterface;
+use SimpleXMLElement;
 use SimPod\SmsManager\Exception\SendingFailed;
+use function assert;
 use function dom_import_simplexml;
 
 final class ApiSmsManager implements SmsManager
@@ -19,7 +22,7 @@ final class ApiSmsManager implements SmsManager
     /** @var string */
     private $apiKey;
 
-    /**@var Client */
+    /** @var Client */
     private $xmlClient;
 
     public function __construct()
@@ -70,7 +73,7 @@ final class ApiSmsManager implements SmsManager
 
     private function buildXml(SmsMessage $smsMessage) : ?string
     {
-        $xml           = new \SimpleXMLElement('<RequestDocument/>');
+        $xml           = new SimpleXMLElement('<RequestDocument/>');
         $requestHeader = $xml->addChild('RequestHeader');
         $requestHeader->addChild('Apikey', $this->apiKey);
         $request = $xml
@@ -93,13 +96,15 @@ final class ApiSmsManager implements SmsManager
 
         $hasAnyNumber = false;
         foreach ($smsMessage->getRecipients() as $recipient) {
-            Validator::isE164($recipient);
+            Assertion::e164($recipient);
             $numberList->addChild('Number', $recipient);
             $hasAnyNumber = true;
         }
 
         /* removes <?xml version="1.0"?> */
         $dom = dom_import_simplexml($xml);
+        assert($dom !== false);
+
         $xml = $dom->ownerDocument->saveXML($dom->ownerDocument->documentElement);
 
         return $hasAnyNumber ? $xml : null;
@@ -107,14 +112,14 @@ final class ApiSmsManager implements SmsManager
 
     private function buildResponseData(ResponseInterface $apiResponse) : Response
     {
-        $result = new \SimpleXMLElement((string) $apiResponse->getBody());
+        $result = new SimpleXMLElement((string) $apiResponse->getBody());
 
         $responseId   = (int) $result->Response['ID'];
         $responseType = (string) $result->Response['Type'];
 
         $response = new Response($responseId, $responseType);
 
-        /** @var \SimpleXMLElement $responseRequestList */
+        /** @var SimpleXMLElement $responseRequestList */
         $responseRequestList = $result->ResponseRequestList;
 
         foreach ($responseRequestList->ResponseRequest as $request) {
@@ -125,7 +130,7 @@ final class ApiSmsManager implements SmsManager
                 (float) $request['SmsPrice']
             );
 
-            /** @var \SimpleXMLElement $responseNumbersList */
+            /** @var SimpleXMLElement $responseNumbersList */
             $responseNumbersList = $request->ResponseNumbersList;
             foreach ($responseNumbersList->Number as $phoneNumber) {
                 $responseRequest->addNumber((string) $phoneNumber);
