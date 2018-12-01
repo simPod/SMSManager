@@ -7,8 +7,8 @@ cache:
         - $HOME/.composer/cache
 
 php:
-    - 7.1
     - 7.2
+    - 7.3
     - nightly
 
 before_install:
@@ -32,7 +32,7 @@ jobs:
 
         -   stage: Test
             env: LOWEST_DEPENDENCIES
-            php: 7.2
+            php: 7.3
             install:
                 - travis_retry composer update -n --prefer-dist --prefer-lowest
 
@@ -51,7 +51,7 @@ jobs:
 
         -   stage: Test
             env: COVERAGE
-            php: 7.1
+            php: 7.2
             before_script:
                 - mv ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini{.disabled,}
                 - if [[ ! $(php -m | grep -si xdebug) ]]; then echo "xdebug required for coverage"; exit 1; fi
@@ -63,12 +63,12 @@ jobs:
 
         -   stage: Code Quality
             env: CODING_STANDARD
-            php: 7.2
+            php: 7.3
             script:
                 - ./vendor/bin/phpcs
 
         -   stage: Code Quality
             env: STATIC_ANALYSIS
-            php: 7.2
+            php: 7.3
             script:
                 - ./vendor/bin/phpstan analyse
