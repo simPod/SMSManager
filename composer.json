@@ -21,7 +21,7 @@
         "ext-dom": "*",
         "ext-simplexml": "*",
         "beberlei/assert": "^3.1",
-        "consistence/consistence": "^1.0",
+        "consistence/consistence": "^1.0 | ^2.0",
         "guzzlehttp/guzzle": "^6.0"
     },
     "require-dev": {
